@@ -72,6 +72,11 @@ public final class Constants {
     public static final boolean CDS_SUPPORTS_IMAGE_COPY;
 
     /**
+     * Whether or not CDS supports image copy (with preserved timestamps).
+     */
+    public static final boolean AOT_SUPPORTED;
+
+    /**
      * End of line string.
      */
     public static final String EOL = System.getProperty("line.separator");
@@ -135,6 +140,9 @@ public final class Constants {
         JDEPS_REQUIRES_MISSING_DEPS_OPTION = feature > 11 || (feature == 11 && update >= 11);
         CDS_REQUIRES_UNLOCK_OPTION = feature <= 10;
         CDS_SUPPORTS_IMAGE_COPY = feature >= 10;
+        AOT_SUPPORTED = feature >= 25;
+        System.out.println("\nXXXXXXXX feature = " + feature);
+        System.out.println("\nXXXXXXXX AOT_SUPPORTED = " + AOT_SUPPORTED);
     }
 
     private Constants() {

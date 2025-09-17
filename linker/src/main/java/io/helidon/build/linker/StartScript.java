@@ -329,11 +329,15 @@ public class StartScript {
             final List<String> command = new ArrayList<>();
             command.add("bin" + Constants.DIR_SEP + "java");
             if (cdsInstalled()) {
-                if (cdsRequiresUnlock()) {
-                    command.add(Constants.CDS_UNLOCK_OPTIONS);
+                if (Constants.AOT_SUPPORTED) {
+                    command.add("-XX:AotCache=lib" + Constants.DIR_SEP + "start.aot");
+                } else {
+                    if (cdsRequiresUnlock()) {
+                        command.add(Constants.CDS_UNLOCK_OPTIONS);
+                    }
+                    command.add("-XX:SharedArchiveFile=lib" + Constants.DIR_SEP + "start.jsa");
+                    command.add("-Xshare:auto");
                 }
-                command.add("-XX:SharedArchiveFile=lib" + Constants.DIR_SEP + "start.jsa");
-                command.add("-Xshare:auto");
             }
             command.addAll(defaultJvmOptions());
             command.add("-jar");

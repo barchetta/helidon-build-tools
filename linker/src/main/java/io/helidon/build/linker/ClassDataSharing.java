@@ -143,6 +143,8 @@ public final class ClassDataSharing {
         private static final String XX_DUMP_LOADED_CLASS_LIST = "-XX:DumpLoadedClassList=";
         private static final String XX_SHARED_ARCHIVE_FILE = "-XX:SharedArchiveFile=";
         private static final String XX_SHARED_CLASS_LIST_FILE = "-XX:SharedClassListFile=";
+        private static final String XX_AOT_CACHE_OUTPUT = "-XX:AOTCacheOutput=";
+        private static final String XX_AOT_CACHE = "-XX:AOTCache=";
         private static final String EXIT_ON_STARTED = "-Dexit.on.started=";
         private static final String EXIT_ON_STARTED_VALUE = "!";
         private static final String UTF_8_ENCODING = "-Dfile.encoding=UTF-8";
@@ -331,18 +333,25 @@ public final class ClassDataSharing {
                 this.targetDescription = "module " + target + " in " + jri;
             }
 
-            if (classListFile == null) {
-                this.classListFile = tempFile(CLASS_LIST_FILE_SUFFIX);
-                this.classList = buildClassList();
-            } else {
-                this.classList = loadClassList();
+            if (archiveFile == null) {
+                archiveFile = requireDirectory(jri.resolve(archiveDir)).resolve(ARCHIVE_NAME);
             }
 
-            if (createArchive) {
-                if (archiveFile == null) {
-                    archiveFile = requireDirectory(jri.resolve(archiveDir)).resolve(ARCHIVE_NAME);
+            if (Constants.AOT_SUPPORTED) {
+                classList = List.of();
+                if (createArchive) {
+                    buildAotCache();
                 }
-                buildCdsArchive();
+            } else {
+                if (classListFile == null) {
+                    this.classListFile = tempFile(CLASS_LIST_FILE_SUFFIX);
+                    this.classList = buildClassList();
+                } else {
+                    this.classList = loadClassList();
+                }
+                if (createArchive) {
+                    buildCdsArchive();
+                }
             }
 
             return new ClassDataSharing(this);
@@ -364,6 +373,17 @@ public final class ClassDataSharing {
                 execute(action, XSHARE_DUMP, XX_SHARED_ARCHIVE_FILE + archiveFile,
                         XX_SHARED_CLASS_LIST_FILE + classListFile, UTF_8_ENCODING);
             }
+            if (Constants.OS == OSType.Windows) {
+                // Try to make the archive file writable so that a second run can delete the image
+                jri.resolve(archiveFile).toFile().setWritable(true);
+            }
+        }
+
+        @SuppressWarnings("ResultOfMethodCallIgnored")
+        private void buildAotCache() throws Exception {
+            final String action = "Creating AOTCache for " + targetDescription;
+            System.out.println("XXXX " + action);
+            execute(action, XX_AOT_CACHE_OUTPUT + archiveFile, UTF_8_ENCODING);
             if (Constants.OS == OSType.Windows) {
                 // Try to make the archive file writable so that a second run can delete the image
                 jri.resolve(archiveFile).toFile().setWritable(true);

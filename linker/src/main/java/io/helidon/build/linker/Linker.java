@@ -243,7 +243,9 @@ public final class Linker {
                 final Application app = application;
                 int jdkCount = 0;
                 int appCount = 0;
+                int classCount = 0;
                 for (String name : cds.classList()) {
+                    System.out.println("XXX " + classCount + ": " + name);
                     final String resourcePath = name + ".class";
                     if (jdk.containsResource(resourcePath)) {
                         jdkCount++;
