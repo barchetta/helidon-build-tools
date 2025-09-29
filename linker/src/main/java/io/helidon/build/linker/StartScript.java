@@ -330,7 +330,7 @@ public class StartScript {
             command.add("bin" + Constants.DIR_SEP + "java");
             if (cdsInstalled()) {
                 if (Constants.AOT_SUPPORTED) {
-                    command.add("-XX:AotCache=lib" + Constants.DIR_SEP + "start.aot");
+                    command.add("-Xlog:aot -XX:AotCache=lib" + Constants.DIR_SEP + "start.aot");
                 } else {
                     if (cdsRequiresUnlock()) {
                         command.add(Constants.CDS_UNLOCK_OPTIONS);

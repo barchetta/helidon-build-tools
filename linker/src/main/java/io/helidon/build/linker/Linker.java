@@ -31,6 +31,7 @@ import io.helidon.build.common.ProcessMonitor;
 import io.helidon.build.common.logging.Log;
 import io.helidon.build.common.logging.LogFormatter;
 import io.helidon.build.common.logging.LogLevel;
+import io.helidon.build.linker.util.Constants;
 import io.helidon.build.linker.util.JavaRuntime;
 
 import static io.helidon.build.common.FileUtils.fileName;
@@ -226,6 +227,7 @@ public final class Linker {
                                                              .jvmOptions(config.defaultJvmOptions())
                                                              .args((config.defaultArgs()))
                                                              .archiveFile(application.archivePath())
+                                                             .aot(Constants.AOT_SUPPORTED)
                                                              .exitOnStartedValue(exitOnStarted)
                                                              .maxWaitSeconds(config.maxAppStartSeconds())
                                                              .logOutput(config.verbose())
@@ -235,38 +237,41 @@ public final class Linker {
 
                 cdsArchiveSize = sizeOf(config.jriDirectory().resolve(application.archivePath()));
 
-                // Count how many classes in the archive are from the JDK vs the app. Note that we cannot
-                // just count one and subtract since some classes in the class list may not have been
-                // put in the archive (see verbose output for examples).
-
-                final JavaRuntime jdk = config.jdk();
-                final Application app = application;
-                int jdkCount = 0;
-                int appCount = 0;
-                int classCount = 0;
-                for (String name : cds.classList()) {
-                    System.out.println("XXX " + classCount + ": " + name);
-                    final String resourcePath = name + ".class";
-                    if (jdk.containsResource(resourcePath)) {
-                        jdkCount++;
-                    } else if (app.containsResource(resourcePath)) {
-                        appCount++;
-                    }
-                }
-
-                // Report the stats
-
-                final String cdsSize = BoldBlue.format("%.1fM", mb(cdsArchiveSize));
-                final String jdkSize = BoldBlue.format("%d", jdkCount);
-                final String appSize = BoldBlue.format("%d", appCount);
-                if (appCount == 0) {
-                    if (!CDS_REQUIRES_UNLOCK_OPTION) {
-                        Log.warn("CDS archive does not contain any application classes, but should!");
-                    }
-                    Log.info("CDS archive is %s for %s JDK classes", cdsSize, jdkSize);
+                if (cds.aot()) {
+                    // For aot we do not have the class list so just report archive size.
+                    Log.info("AOT Cache %s is %s", cds.archiveFile(), cdsSize);
                 } else {
-                    final String total = BoldBlue.format("%d", jdkCount + appCount);
-                    Log.info("CDS archive is %s for %s classes: %s JDK and %s application", cdsSize, total, jdkSize, appSize);
+                    // Count how many classes in the archive are from the JDK vs the app. Note that we cannot
+                    // just count one and subtract since some classes in the class list may not have been
+                    // put in the archive (see verbose output for examples).
+
+                    final JavaRuntime jdk = config.jdk();
+                    final Application app = application;
+                    int jdkCount = 0;
+                    int appCount = 0;
+                    for (String name : cds.classList()) {
+                        final String resourcePath = name + ".class";
+                        if (jdk.containsResource(resourcePath)) {
+                            jdkCount++;
+                        } else if (app.containsResource(resourcePath)) {
+                            appCount++;
+                        }
+                    }
+
+                    // Report the stats
+
+                    final String cdsSize = BoldBlue.format("%.1fM", mb(cdsArchiveSize));
+                    final String jdkSize = BoldBlue.format("%d", jdkCount);
+                    final String appSize = BoldBlue.format("%d", appCount);
+                    if (appCount == 0) {
+                        if (!CDS_REQUIRES_UNLOCK_OPTION) {
+                            Log.warn("CDS archive does not contain any application classes, but should!");
+                        }
+                        Log.info("CDS archive is %s for %s JDK classes", cdsSize, jdkSize);
+                    } else {
+                        final String total = BoldBlue.format("%d", jdkCount + appCount);
+                        Log.info("CDS archive is %s for %s classes: %s JDK and %s application", cdsSize, total, jdkSize, appSize);
+                    }
                 }
 
             } catch (Exception e) {

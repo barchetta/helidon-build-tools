@@ -57,6 +57,8 @@ public final class ClassDataSharing {
     private final Path classListFile;
     private final Path archiveFile;
     private final List<String> classList;
+    private final boolean aot;
+
 
     /**
      * Returns a new {@link Builder}.
@@ -74,6 +76,7 @@ public final class ClassDataSharing {
         this.classListFile = builder.classListFile;
         this.archiveFile = builder.archiveFile;
         this.classList = builder.classList;
+        this.aot = builder.aot;
     }
 
     /**
@@ -131,11 +134,21 @@ public final class ClassDataSharing {
     }
 
     /**
+     * True if aot is enabled.
+     *
+     * @return true if aot is enabled.
+     */
+    public boolean aot() {
+        return aot;
+    }
+
+    /**
      * Builder.
      */
     public static final class Builder {
         private static final String FILE_PREFIX = "start";
         private static final String ARCHIVE_NAME = FILE_PREFIX + ".jsa";
+        private static final String CACHE_NAME = FILE_PREFIX + ".cache";
         private static final String CLASS_LIST_FILE_SUFFIX = ".classlist";
         private static final String JAR_SUFFIX = ".jar";
         private static final String XSHARE_OFF = "-Xshare:off";
@@ -143,7 +156,7 @@ public final class ClassDataSharing {
         private static final String XX_DUMP_LOADED_CLASS_LIST = "-XX:DumpLoadedClassList=";
         private static final String XX_SHARED_ARCHIVE_FILE = "-XX:SharedArchiveFile=";
         private static final String XX_SHARED_CLASS_LIST_FILE = "-XX:SharedClassListFile=";
-        private static final String XX_AOT_CACHE_OUTPUT = "-XX:AOTCacheOutput=";
+        private static final String XX_AOT_CACHE_OUTPUT = "-Xlog:aot -XX:AOTCacheOutput=";
         private static final String XX_AOT_CACHE = "-XX:AOTCache=";
         private static final String EXIT_ON_STARTED = "-Dexit.on.started=";
         private static final String EXIT_ON_STARTED_VALUE = "!";
@@ -154,6 +167,7 @@ public final class ClassDataSharing {
         private Path jri;
         private String archiveDir;
         private String applicationModule;
+        private boolean aot = false;
         private Path mainJar;
         private Path classListFile;
         private Path archiveFile;
@@ -264,6 +278,17 @@ public final class ClassDataSharing {
         }
 
         /**
+         * Sets whether or not to enable Aot features. Default is false.
+         *
+         * @param aot {@code true} if Aot features should be used iff JRI is >= 25.
+         * @return The builder.
+         */
+        public Builder aot(boolean aot) {
+            this.aot = aot;
+            return this;
+        }
+
+        /**
          * Sets whether or not to output from the build process(es) should be logged.
          * Defaults to {@code false} and will include the output in any exception message.
          *
@@ -333,15 +358,15 @@ public final class ClassDataSharing {
                 this.targetDescription = "module " + target + " in " + jri;
             }
 
-            if (archiveFile == null) {
-                archiveFile = requireDirectory(jri.resolve(archiveDir)).resolve(ARCHIVE_NAME);
-            }
+            System.out.println("XXXXXX Working Directory = " + System.getProperty("user.dir"));
 
-            if (Constants.AOT_SUPPORTED) {
-                classList = List.of();
+            if (aot) {
                 if (createArchive) {
-                    buildAotCache();
+                    if (archiveFile == null) {
+                        archiveFile = requireDirectory(jri.resolve(archiveDir)).resolve(CACHE_NAME);
+                    }
                 }
+                buildAotCache();
             } else {
                 if (classListFile == null) {
                     this.classListFile = tempFile(CLASS_LIST_FILE_SUFFIX);
@@ -350,6 +375,9 @@ public final class ClassDataSharing {
                     this.classList = loadClassList();
                 }
                 if (createArchive) {
+                    if (archiveFile == null) {
+                        archiveFile = requireDirectory(jri.resolve(archiveDir)).resolve(ARCHIVE_NAME);
+                    }
                     buildCdsArchive();
                 }
             }
@@ -365,7 +393,7 @@ public final class ClassDataSharing {
 
         @SuppressWarnings("ResultOfMethodCallIgnored")
         private void buildCdsArchive() throws Exception {
-            final String action = "Creating Class Data Sharing archive for " + targetDescription;
+            final String action = "Creating Class Data Sharing archive " + archiveFile + " for " + targetDescription;
             if (Constants.CDS_REQUIRES_UNLOCK_OPTION) {
                 execute(action, Constants.CDS_UNLOCK_OPTIONS, XSHARE_DUMP, XX_SHARED_ARCHIVE_FILE + archiveFile,
                         XX_SHARED_CLASS_LIST_FILE + classListFile, UTF_8_ENCODING);
@@ -381,12 +409,13 @@ public final class ClassDataSharing {
 
         @SuppressWarnings("ResultOfMethodCallIgnored")
         private void buildAotCache() throws Exception {
-            final String action = "Creating AOTCache for " + targetDescription;
+            Path cachePath = jri.resolve(archiveFile);
+            final String action = "Creating AOTCache " + cachePath + " for " + targetDescription;
             System.out.println("XXXX " + action);
-            execute(action, XX_AOT_CACHE_OUTPUT + archiveFile, UTF_8_ENCODING);
+            execute(action, XX_AOT_CACHE_OUTPUT + cachePath, UTF_8_ENCODING);
             if (Constants.OS == OSType.Windows) {
                 // Try to make the archive file writable so that a second run can delete the image
-                jri.resolve(archiveFile).toFile().setWritable(true);
+                jri.resolve(cachePath).toFile().setWritable(true);
             }
         }
 
