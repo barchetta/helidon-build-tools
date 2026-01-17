@@ -156,7 +156,8 @@ public final class ClassDataSharing {
         private static final String XX_DUMP_LOADED_CLASS_LIST = "-XX:DumpLoadedClassList=";
         private static final String XX_SHARED_ARCHIVE_FILE = "-XX:SharedArchiveFile=";
         private static final String XX_SHARED_CLASS_LIST_FILE = "-XX:SharedClassListFile=";
-        private static final String XX_AOT_CACHE_OUTPUT = "-Xlog:aot -XX:AOTCacheOutput=";
+        private static final String XX_AOT_LOG = "-Xlog:aot";
+        private static final String XX_AOT_CACHE_OUTPUT = "-XX:AOTCacheOutput=";
         private static final String XX_AOT_CACHE = "-XX:AOTCache=";
         private static final String EXIT_ON_STARTED = "-Dexit.on.started=";
         private static final String EXIT_ON_STARTED_VALUE = "!";
@@ -412,7 +413,7 @@ public final class ClassDataSharing {
             Path cachePath = jri.resolve(archiveFile);
             final String action = "Creating AOTCache " + cachePath + " for " + targetDescription;
             System.out.println("XXXX " + action);
-            execute(action, XX_AOT_CACHE_OUTPUT + cachePath, UTF_8_ENCODING);
+            execute(action, XX_AOT_LOG, XX_AOT_CACHE_OUTPUT + cachePath, UTF_8_ENCODING);
             if (Constants.OS == OSType.Windows) {
                 // Try to make the archive file writable so that a second run can delete the image
                 jri.resolve(cachePath).toFile().setWritable(true);

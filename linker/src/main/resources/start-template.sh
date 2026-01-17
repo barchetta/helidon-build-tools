@@ -58,7 +58,7 @@ init() {
     local -r defaultJvm="<DEFAULT_APP_JVM>"
     local -r defaultArgs="<DEFAULT_APP_ARGS>"
     local -r cdsOption="<CDS_UNLOCK>-XX:SharedArchiveFile=${homeDir}/lib/start.jsa -Xshare:"
-    local -r aotOption="-XX:AOTCache=${homeDir}/lib/start.jsa"
+    local -r aotOption="-XX:AOTCache=${homeDir}/lib/start.cache"
     local -r exitOption="-Dexit.on.started=<EXIT_ON_STARTED>"
     local -r jvmDefaults="${DEFAULT_APP_JVM:-${defaultJvm}}"
     local -r argDefaults="${DEFAULT_APP_ARGS:-${defaultArgs}}"
