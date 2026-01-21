@@ -57,6 +57,7 @@ function init {
     $defaultJvm="<DEFAULT_APP_JVM>"
     $defaultArgs="<DEFAULT_APP_ARGS>"
     $cdsOption="<CDS_UNLOCK>-XX:SharedArchiveFile=$homeDir\lib\start.jsa -Xshare:"
+    $aotOption="-XX:AOTCache=$homeDir\lib\start.aot"
     $exitOption="`"-Dexit.on.started=<EXIT_ON_STARTED>`""
     $debugDefaults = if (Test-Path env:DEFAULT_APP_DEBUG) { $env:DEFAULT_APP_DEBUG } else { $defaultDebug }
     $jvmDefaults = if (Test-Path env:DEFAULT_APP_JVM) { $env:DEFAULT_APP_JVM } else { $defaultJvm }
@@ -66,7 +67,9 @@ function init {
     $test=$false
     $share="auto"
     $useCds=$true
+    $aotSupported
     $debug=$false
+    $javaMajorVersion
     $i=0
     while ($i -lt $arguments.Length) {
         switch ($($arguments[$i])) {

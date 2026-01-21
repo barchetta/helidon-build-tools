@@ -30,7 +30,6 @@ import java.util.stream.Stream;
 import io.helidon.build.common.FileUtils;
 import io.helidon.build.common.logging.Log;
 import io.helidon.build.common.logging.LogLevel;
-import io.helidon.build.linker.util.Constants;
 import io.helidon.build.linker.util.JavaRuntime;
 
 import static io.helidon.build.common.FileUtils.list;
@@ -47,8 +46,8 @@ public final class Application implements ResourceContainer {
     /**
      * The relative path of the application directory.
      */
-    private static final  String ARCHIVE_FILENAME = Constants.AOT_SUPPORTED ? "start.cache" : "start.jsa";
-    private static final Path ARCHIVE_PATH = Paths.get("lib" + DIR_SEP + ARCHIVE_FILENAME);
+    private static final Path ARCHIVE_PATH = Paths.get("lib" + DIR_SEP + "start.jsa");
+    private static final Path CACHE_PATH   = Paths.get("lib" + DIR_SEP + "start.aot");
     public static final Path APP_DIR = Paths.get("app");
     private static final String HELIDON_JAR_NAME_PREFIX = "helidon-";
     private static final String MP_FILE_PREFIX = HELIDON_JAR_NAME_PREFIX + "microprofile";
@@ -125,6 +124,15 @@ public final class Application implements ResourceContainer {
      */
     public Path archivePath() {
         return ARCHIVE_PATH;
+    }
+
+    /**
+     * Returns the relative path at which to create the AOT Cache.
+     *
+     * @return The path.
+     */
+    public Path aotCachePath() {
+        return CACHE_PATH;
     }
 
     /**

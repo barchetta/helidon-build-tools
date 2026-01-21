@@ -287,6 +287,8 @@ public class StartScript {
          */
         boolean cdsInstalled();
 
+        boolean useAot();
+
         /**
          * Returns whether or not debug support is installed.
          *
@@ -331,7 +333,7 @@ public class StartScript {
             if (cdsInstalled()) {
                 if (Constants.AOT_SUPPORTED) {
                     command.add("-Xlog:aot");
-                    command.add("-XX:AotCache=lib" + Constants.DIR_SEP + "start.cache");
+                    command.add("-XX:AotCache=lib" + Constants.DIR_SEP + "start.aot");
                 } else {
                     if (cdsRequiresUnlock()) {
                         command.add(Constants.CDS_UNLOCK_OPTIONS);
@@ -506,6 +508,7 @@ public class StartScript {
         private List<String> defaultDebugOptions;
         private List<String> defaultArgs;
         private boolean cdsInstalled;
+        private boolean useAot;
         private boolean debugInstalled;
         private String exitOnStartedValue;
         private Template template;
@@ -518,6 +521,7 @@ public class StartScript {
             this.defaultJvmOptions = emptyList();
             this.defaultDebugOptions = List.of(Configuration.Builder.DEFAULT_DEBUG);
             this.cdsInstalled = true;
+            this.useAot = true;
             this.debugInstalled = true;
             this.exitOnStartedValue = "!";
             this.defaultArgs = emptyList();
@@ -594,6 +598,17 @@ public class StartScript {
          */
         public Builder cdsInstalled(boolean cdsInstalled) {
             this.cdsInstalled = cdsInstalled;
+            return this;
+        }
+
+        /**
+         * Sets whether or not to use AOT Cache
+         *
+         * @param useAot {@code true} to use AOT Cache
+         * @return The builder.
+         */
+        public Builder useAot(boolean useAot) {
+            this.useAot = useAot;
             return this;
         }
 
@@ -707,6 +722,11 @@ public class StartScript {
                 @Override
                 public boolean cdsInstalled() {
                     return cdsInstalled;
+                }
+
+                @Override
+                public boolean useAot() {
+                    return useAot;
                 }
 
                 @Override

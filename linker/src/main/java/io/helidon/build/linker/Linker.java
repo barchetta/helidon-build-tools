@@ -218,6 +218,14 @@ public final class Linker {
         this.jriMainJar = application.install(config.jriDirectory(), stripDebug);
     }
 
+    private Path archiveFile() {
+        if (config().aot()) {
+            return application.aotCachePath();
+        } else {
+            return application.archivePath();
+        }
+    }
+
     private void installCdsArchive() {
         if (config.cds()) {
             try {
@@ -226,7 +234,7 @@ public final class Linker {
                                                              .applicationJar(jriMainJar)
                                                              .jvmOptions(config.defaultJvmOptions())
                                                              .args((config.defaultArgs()))
-                                                             .archiveFile(application.archivePath())
+                                                             .archiveFile(archiveFile())
                                                              .aot(Constants.AOT_SUPPORTED)
                                                              .exitOnStartedValue(exitOnStarted)
                                                              .maxWaitSeconds(config.maxAppStartSeconds())
@@ -235,7 +243,7 @@ public final class Linker {
 
                 // Get the archive size
 
-                cdsArchiveSize = sizeOf(config.jriDirectory().resolve(application.archivePath()));
+                cdsArchiveSize = sizeOf(config.jriDirectory().resolve(archiveFile()));
 
                 if (cds.aot()) {
                     // For aot we do not have the class list so just report archive size.
@@ -289,6 +297,7 @@ public final class Linker {
                                      .mainJar(jriMainJar)
                                      .defaultArgs(config.defaultArgs())
                                      .cdsInstalled(config.cds())
+                                     .useAot(config.aot())
                                      .debugInstalled(!config.stripDebug())
                                      .exitOnStartedValue(exitOnStarted)
                                      .build();

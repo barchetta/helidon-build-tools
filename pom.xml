@@ -134,7 +134,7 @@
         <version.lib.gson>2.8.9</version.lib.gson>
         <version.lib.guava>32.0.1-jre</version.lib.guava>
         <version.lib.hamcrest>1.3</version.lib.hamcrest>
-        <version.lib.invoker>3.3.0</version.lib.invoker>
+        <version.lib.invoker>3.9.1</version.lib.invoker>
         <version.lib.jackson>2.11.0</version.lib.jackson>
         <version.lib.jandex>3.3.0</version.lib.jandex>
         <version.lib.jansi>1.18</version.lib.jansi>
@@ -200,7 +200,7 @@
         <version.plugin.jacoco>0.7.9</version.plugin.jacoco>
         <version.plugin.jar>3.0.2</version.plugin.jar>
         <version.plugin.javadoc>3.6.2</version.plugin.javadoc>
-        <version.plugin.invoker>3.8.0</version.plugin.invoker>
+        <version.plugin.invoker>3.9.1</version.plugin.invoker>
         <version.plugin.license>1.16</version.plugin.license>
         <version.plugin.plexus>2.2.0</version.plugin.plexus>
         <version.plugin.plugin-plugin>3.10.2</version.plugin.plugin-plugin>

@@ -41,6 +41,7 @@ public class StartScriptTemplate extends StartScript.SimpleTemplate {
     private static final String DEFAULT_JVM_DESC_VAR = "<DEFAULT_APP_JVM_DESC>";
     private static final String DEFAULT_DEBUG_DESC_VAR = "<DEFAULT_APP_DEBUG_DESC>";
     private static final String EXIT_ON_STARTED_VAR = "<EXIT_ON_STARTED>";
+    private static final String USE_AOT = "<USE_AOT>";
     private static final String STAT_FORMAT_VAR = "<STAT_FORMAT>";
     private static final String MODULES_TIME_STAMP_VAR = "<MODULES_TIME_STAMP>";
     private static final String JAR_TIME_STAMP_VAR = "<JAR_TIME_STAMP>";
@@ -114,6 +115,7 @@ public class StartScriptTemplate extends StartScript.SimpleTemplate {
         replace(JAR_TIME_STAMP_VAR, jarModTime);
         replace(COPY_INSTRUCTIONS_VAR, copyInstructions);
         replace(EXIT_ON_STARTED_VAR, config.exitOnStartedValue());
+        replace(USE_AOT, config.useAot() ? "true": "");
 
         return toString();
     }
